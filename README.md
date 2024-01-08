@@ -9,4 +9,4 @@ Place: A subclass of BaseModel that represents an accommodation or listing on th
 Review: A subclass of BaseModel that represents a review or feedback from a user about an accommodation. It has attributes such as place_id (a reference to a Place instance), user_id (a reference to a User instance), text, and score.
 These are some of the main classes in the AirBnB clone project, but there are also other classes that handle the storage and web framework of the application.
 
-Authors: Faith Ifunanya Oputa  & Kester.
+Authors: Faith Ifunanya Oputa  & Kester G. Onojafe
