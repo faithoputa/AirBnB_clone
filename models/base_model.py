@@ -4,8 +4,8 @@ Module for BaseModel
 """
 
 
-import uuid
 from datetime import datetime
+import uuid
 
 
 class BaseModel:
@@ -13,14 +13,24 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Public instance attributes: common to the entire classes
-        ARGS: Args, and Kwargs cautionary parameters
+        ARGS: 
+              Args, and Kwargs
+              Note: Warning: created_at and updated_at are strings in this dictionary
+              but inside your BaseModel instance is working with datetime object
         """
-
-        self.id = str(uuid.uuid4())
-        dt = datetime.today()
-        self.created_at = dt.isoformat()
-        up_at = datetime.today()
-        self.updated_at = up_at.isoformat()
+        if kwargs:
+            for key, value in kwargs.items():
+                if key in ['created_at', 'updated_at']:
+                    setattr(self, key, datetime.strptime(
+                        value, '%Y-%m-%dT%H:%M:%S.%f'))
+                elif key != '__class__':
+                    setattr(self, key, value)
+        else:
+            self.id = str(uuid.uuid4())
+            dt = datetime.now()
+            self.created_at = dt.isoformat()
+            up_at = datetime.now()
+            self.updated_at = up_at.isoformat()
 
     def __str__(self):
         """The __str__ method to print classname, id, dictionary data """
