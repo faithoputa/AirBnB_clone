@@ -6,6 +6,7 @@ Module for BaseModel
 
 from datetime import datetime
 import uuid
+import models
 
 
 class BaseModel:
@@ -31,6 +32,7 @@ class BaseModel:
             self.created_at = dt.isoformat()
             up_at = datetime.now()
             self.updated_at = up_at.isoformat()
+        models.storage.new(self)
 
     def __str__(self):
         """The __str__ method to print classname, id, dictionary data """
@@ -39,6 +41,7 @@ class BaseModel:
 
     def save(self):
         self.updated_at = datetime.now().isoformat()
+        models.storage.save()
 
     def to_dict(self):
         self.data_collection = {
