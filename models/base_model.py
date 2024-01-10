@@ -24,7 +24,8 @@ class BaseModel:
 
     def __str__(self):
         """The __str__ method to print classname, id, dictionary data """
-        return (f"[<class name>] (<self.id>) <self.__dict__>:to be printed here")
+        class_name = self.__class__.__name__
+        return "[{}] ({}) {}".format(class_name, self.id, self.__dict__)
 
     def save(self):
         self.updated_at = datetime.now().isoformat()
