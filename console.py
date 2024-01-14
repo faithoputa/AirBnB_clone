@@ -1,19 +1,21 @@
 #!/usr/bin/python3
 """ console """
-import shlex
-from datetime import datetime
-from models.base_model import BaseModel
-from models import amenity, city, place, review, state, user
 
-classes = {
-    "Amenity": amenity.Amenity,
-    "BaseModel": BaseModel,
-    "City": city.City,
-    "Place": place.Place,
-    "Review": review.Review,
-    "State": state.State,
-    "User": user.User
-}
+import cmd
+from datetime import datetime
+import models
+from models.amenity import Amenity
+from models.base_model import BaseModel
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
+import shlex  # for splitting the line along spaces except in double quotes
+
+classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
+
 
 class HBNBCommand(cmd.Cmd):
     """ HBNH console """
@@ -40,16 +42,15 @@ class HBNBCommand(cmd.Cmd):
                 key = kvp[0]
                 value = kvp[1]
                 if value[0] == value[-1] == '"':
-                    value = value[1:-1]
-                elif ' ' in value:
-                    value = '"{}"'.format(value)
-                try:
-                    value = int(value)
-                except:
+                    value = shlex.split(value)[0].replace('_', ' ')
+                else:
                     try:
-                        value = float(value)
+                        value = int(value)
                     except:
-                        continue
+                        try:
+                            value = float(value)
+                        except:
+                            continue
                 new_dict[key] = value
         return new_dict
 
@@ -111,5 +112,53 @@ class HBNBCommand(cmd.Cmd):
         if len(args) == 0:
             obj_dict = models.storage.all()
         elif args[0] in classes:
-            obj_dict =
+            obj_dict = models.storage.all(classes[args[0]])
+        else:
+            print("** class doesn't exist **")
+            return False
+        for key in obj_dict:
+            obj_list.append(str(obj_dict[key]))
+        print("[", end="")
+        print(", ".join(obj_list), end="")
+        print("]")
 
+    def do_update(self, arg):
+        """Update an instance based on the class name, id, attribute & value"""
+        args = shlex.split(arg)
+        integers = ["number_rooms", "number_bathrooms", "max_guest",
+                    "price_by_night"]
+        floats = ["latitude", "longitude"]
+        if len(args) == 0:
+            print("** class name missing **")
+        elif args[0] in classes:
+            if len(args) > 1:
+                k = args[0] + "." + args[1]
+                if k in models.storage.all():
+                    if len(args) > 2:
+                        if len(args) > 3:
+                            if args[0] == "Place":
+                                if args[2] in integers:
+                                    try:
+                                        args[3] = int(args[3])
+                                    except:
+                                        args[3] = 0
+                                elif args[2] in floats:
+                                    try:
+                                        args[3] = float(args[3])
+                                    except:
+                                        args[3] = 0.0
+                            setattr(models.storage.all()[k], args[2], args[3])
+                            models.storage.all()[k].save()
+                        else:
+                            print("** value missing **")
+                    else:
+                        print("** attribute name missing **")
+                else:
+                    print("** no instance found **")
+            else:
+                print("** instance id missing **")
+        else:
+            print("** class doesn't exist **")
+
+if __name__ == '__main__':
+    HBNBCommand().cmdloop()
